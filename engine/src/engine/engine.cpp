@@ -12,6 +12,9 @@ namespace Engine
     void Engine::loadPlugins()
     {
         std::vector<std::string> neededPlugins = {"plugin1"};
+#ifdef __linux__
+        neededPlugins.push_back("linuxplugin");
+#endif
         m_pluginManager.loadPlugins(neededPlugins);
     }
 
@@ -19,5 +22,17 @@ namespace Engine
     {
         loadPlugins();
         std::cout << "Engine is running" << std::endl;
+
+        for (auto& [_, plugin] : m_pluginManager.plugins()) {
+            plugin->init();
+        }
+
+        for (auto& [_, plugin] : m_pluginManager.plugins()) {
+            plugin->update();
+        }
+
+        for (auto& [_, plugin] : m_pluginManager.plugins()) {
+            plugin->shutdown();
+        }
     }
 }
