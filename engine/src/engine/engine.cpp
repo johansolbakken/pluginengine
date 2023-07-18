@@ -23,16 +23,27 @@ namespace Engine
         loadPlugins();
         std::cout << "Engine is running" << std::endl;
 
+        m_running = true;
+
         for (auto& [_, plugin] : m_pluginManager.plugins()) {
+            plugin->setEventCallback([this]() {
+                close();
+            });
             plugin->init();
         }
 
-        for (auto& [_, plugin] : m_pluginManager.plugins()) {
-            plugin->update();
+        while (m_running) {
+            for (auto& [_, plugin] : m_pluginManager.plugins()) {
+                plugin->update();
+            }
         }
 
         for (auto& [_, plugin] : m_pluginManager.plugins()) {
             plugin->shutdown();
         }
+    }
+
+    void Engine::close() {
+        m_running = false;
     }
 }
