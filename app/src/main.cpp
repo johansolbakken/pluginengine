@@ -1,7 +1,6 @@
 #include <engine/engine.h>
 
 #include <iostream>
-#include <filesystem>
 
 int main(int argc, char **argv)
 {
@@ -13,8 +12,10 @@ int main(int argc, char **argv)
     }
 
     Engine::Engine engine;
-    //engine.pluginManager().loadPlugins(argv[1], {"plugin1", "plugin2"});
-    engine.pluginManager().loadPlugin("plugins/plugin1/libplugin1.dylib");
+    engine.pluginManager().setPath(argv[1]);
+    // engine.pluginManager().loadPlugin("plugins/plugin1/libplugin1.dylib");
+    // engine.pluginManager().loadAllPlugins();
+    engine.pluginManager().loadPlugins({"plugin1", "plugin2"});
     engine.run();
     return 0;
 }

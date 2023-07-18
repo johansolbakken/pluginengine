@@ -19,14 +19,23 @@ namespace Engine
     std::string pluginPrefix = "lib";
 #endif
 
-    void PluginManager::loadPlugin(const std::string &path)
+    void PluginManager::setPath(const std::string &path)
     {
+        m_path = path;
+    }
+
+    void PluginManager::loadPlugin(const std::filesystem::path &path)
+    {
+        std::cout << "\033[90m";
         std::cout << "Loading plugin: " << path << std::endl;
+        std::cout << "\033[0m";
 
         void *handle = dlopen(path.c_str(), RTLD_LAZY);
         if (!handle)
         {
+            std::cerr << "\033[31m";
             std::cerr << "Cannot open library: " << dlerror() << std::endl;
+            std::cerr << "\033[0m";
             return;
         }
 
@@ -36,7 +45,9 @@ namespace Engine
         const char *dlsym_error = dlerror();
         if (dlsym_error)
         {
+            std::cerr << "\033[31m";
             std::cerr << "Cannot load symbol createPlugin: " << dlsym_error << std::endl;
+            std::cerr << "\033[0m";
             dlclose(handle);
             return;
         }
@@ -45,7 +56,9 @@ namespace Engine
         dlsym_error = dlerror();
         if (dlsym_error)
         {
+            std::cerr << "\033[31m";
             std::cerr << "Cannot load symbol destroyPlugin: " << dlsym_error << std::endl;
+            std::cerr << "\033[0m";
             dlclose(handle);
             return;
         }
@@ -53,69 +66,80 @@ namespace Engine
         Plugin *plugin = createPlugin();
         m_plugins.push_back(std::shared_ptr<Plugin>(plugin, destroyPlugin));
 
+        std::cout << "\033[90m";
         std::cout << "Loaded plugin: " << plugin->getPluginName() << std::endl;
+        std::cout << "\033[0m";
     }
 
-    void PluginManager::loadPlugins(const std::string &path)
+    void PluginManager::loadAllPlugins()
     {
-        std::vector<std::string> plugins;
-        /*
-                // Recursively search for plugins
-                std::function<void(std::string)> search;
-                search = [&search, &plugins, &pluginExtension](std::string path)
+        std::function<void(std::string)> search;
+        search = [&search, this](std::string path)
+        {
+            for (auto &p : std::filesystem::directory_iterator(path))
+            {
+                if (p.is_directory())
                 {
-                    for (auto &p : std::filesystem::directory_iterator(path))
-                    {
-                        if (p.is_directory())
-                        {
-                            search(p.path().string());
-                        }
-                        else if (p.path().extension() == pluginExtension)
-                        {
-                            plugins.push_back(p.path().string());
-                        }
-                    }
-                };
-
-                search(path);
-
-                for (auto &plugin : plugins)
+                    search(p.path().string());
+                }
+                else if (p.path().extension() == pluginExtension)
                 {
-                    loadPlugin(plugin);
-                }*/
+                    std::string pluginName = p.path().stem().string().substr(3);
+                    loadPlugin(p.path().string());
+                }
+            }
+        };
+
+        search(m_path);
     }
 
-    void PluginManager::loadPlugins(const std::string &path, const std::vector<std::string> &plugins)
+    void PluginManager::loadPlugins(const std::vector<std::string> &plugins)
     {
-
-        std::vector<std::string> pluginsPaths;
-        /*
-                // Recursively search for plugins
-                std::function<void(std::string)> search;
-                search = [&search, &plugins, &pluginExtension, &pluginsPaths](std::string path)
+        std::vector<std::string> foundPlugins;
+        std::function<void(std::string)> search;
+        search = [&search, this, &plugins, &foundPlugins](std::string path)
+        {
+            for (auto &p : std::filesystem::directory_iterator(path))
+            {
+                if (p.is_directory())
                 {
-                    for (auto &p : std::filesystem::directory_iterator(path))
+                    search(p.path().string());
+                }
+                else if (p.path().extension() == pluginExtension)
+                {
+                    std::string pluginName = p.path().stem().string().substr(3);
+                    for (auto &plugin : plugins)
                     {
-                        if (p.is_directory())
+                        if (pluginName == plugin)
                         {
-                            search(p.path().string());
-                        }
-                        else if (p.path().extension() == pluginExtension)
-                        {
-                            std::string pluginName = p.path().stem().string().substr(3);
-                            if (std::find(plugins.begin(), plugins.end(), pluginName) != plugins.end())
-                            {
-                                pluginsPaths.push_back(p.path().string());
-                            }
+                            loadPlugin(p.path().string());
+                            foundPlugins.push_back(plugin);
                         }
                     }
-                };
+                }
+            }
+        };
 
-                search(path);
+        search(m_path);
 
-                for (auto &plugin : pluginsPaths)
+        for (auto &plugin : plugins)
+        {
+            bool found = false;
+            for (auto &foundPlugin : foundPlugins)
+            {
+                if (plugin == foundPlugin)
                 {
-                    loadPlugin(plugin);
-                }*/
+                    found = true;
+                    break;
+                }
+            }
+
+            if (!found)
+            {
+                std::cerr << "\033[33m";
+                std::cerr << "Warning: Plugin " << plugin << " not found" << std::endl;
+                std::cerr << "\033[0m";
+            }
+        }
     }
 }
