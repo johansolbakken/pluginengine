@@ -1,12 +1,11 @@
 #include <engine/engine.h>
 
 #include <iostream>
+#include <functional>
 
-int main()
+int main(int argc, char** argv)
 {
-    Engine::Engine engine;
-    // assuming working directory is build folder
-    engine.pluginManager().setPath("plugins");
+    Engine::Engine engine(argc, argv);
     engine.run();
     return 0;
 }
