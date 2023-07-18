@@ -23,7 +23,6 @@ namespace Engine
 
     extern "C" void destroyPlugin(Plugin *plugin)
     {
-        std::cout << "I was plugin1 and I am destroyed" << std::endl;
         delete plugin;
     }
 }

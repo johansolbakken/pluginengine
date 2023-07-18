@@ -5,6 +5,7 @@
 #include <memory>
 #include <vector>
 #include <filesystem>
+#include <unordered_map>
 
 namespace Engine
 {
@@ -20,7 +21,7 @@ namespace Engine
         auto &plugins() { return m_plugins; }
 
     private:
-        std::vector<std::shared_ptr<Plugin>> m_plugins;
-        std::filesystem::path m_path;
+        std::unordered_map<std::string, std::shared_ptr<Plugin>> m_plugins;
+        std::filesystem::path m_path = std::filesystem::current_path();
     };
 }

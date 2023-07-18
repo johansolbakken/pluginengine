@@ -63,8 +63,9 @@ namespace Engine
             return;
         }
 
+        std::string pluginName = path.stem().string().substr(3);
         Plugin *plugin = createPlugin();
-        m_plugins.push_back(std::shared_ptr<Plugin>(plugin, destroyPlugin));
+        m_plugins[pluginName] = std::shared_ptr<Plugin>(plugin, destroyPlugin);
 
         std::cout << "\033[90m";
         std::cout << "Loaded plugin: " << plugin->getPluginName() << std::endl;
