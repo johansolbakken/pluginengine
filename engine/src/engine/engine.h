@@ -1,10 +1,6 @@
 #pragma once
 
-#include <string>
-#include <vector>
-#include <memory>
-
-#include "plugin.h"
+#include "pluginmanager.h"
 
 namespace Engine
 {
@@ -12,10 +8,9 @@ namespace Engine
     {
     public:
         void run();
-
-        void loadPlugin(const std::string& path);
+        PluginManager &pluginManager() { return m_pluginManager; }
 
     private:
-        std::vector<std::shared_ptr<Plugin>> plugins;
+        PluginManager m_pluginManager;
     };
 }
