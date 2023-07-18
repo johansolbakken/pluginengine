@@ -15,6 +15,9 @@ namespace Engine
 #ifdef __linux__
         neededPlugins.push_back("linuxplugin");
 #endif
+#ifdef __APPLE__
+        neededPlugins.push_back("macplugin");
+#endif
         m_pluginManager.loadPlugins(neededPlugins);
     }
 
