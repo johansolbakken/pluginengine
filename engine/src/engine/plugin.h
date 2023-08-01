@@ -5,6 +5,15 @@
 
 namespace Engine
 {
+    template <typename PluginType>
+    concept PluginConcept = requires(PluginType p) {
+        { p.getPluginName() } -> std::convertible_to<std::string>;
+        { p.init() } -> std::same_as<void>;
+        { p.shutdown() } -> std::same_as<void>;
+        { p.update() } -> std::same_as<void>;
+        { p.setEventCallback(std::declval<typename PluginType::EventCallback>()) } -> std::same_as<void>;
+    };
+
     class Plugin
     {
     public:
